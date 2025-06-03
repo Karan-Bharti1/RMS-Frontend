@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { baseUrl } from '@/url';
 
 type Role = 'engineer' | 'manager';
 
@@ -7,10 +8,31 @@ const Register: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [role, setRole] = useState<Role>('engineer');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Register submitted', { username, password, role });
+
+    try {
+      const response = await fetch(`${baseUrl}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password, role }),
+      });
+
+      if (response.ok) {
+        console.log('Registration successful');
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        alert(`Registration failed: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      alert('Something went wrong. Please try again later.');
+    }
   };
 
   return (
@@ -28,17 +50,15 @@ const Register: React.FC = () => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
 
           <input
             type="password"
-             placeholder="Password"
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-           
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
 
@@ -59,7 +79,16 @@ const Register: React.FC = () => {
             Register
           </button>
         </div>
-          <p className='text-center'>Back to <Link to="/login" className='text-blue-500 hover:text-red-500 hover:underline' >Login ?</Link></p>
+
+        <p className="text-center mt-4">
+          Back to{' '}
+          <Link
+            to="/login"
+            className="text-blue-500 hover:text-red-500 hover:underline"
+          >
+            Login?
+          </Link>
+        </p>
       </form>
     </main>
   );

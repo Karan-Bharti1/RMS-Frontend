@@ -1,17 +1,42 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { baseUrl } from '@/url';
 type Role = 'engineer' | 'manager';
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [role, setRole] = useState<Role>('engineer');
+const navigate=useNavigate()
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log('Login submitted', { username, password, role });
-  };
+  try {
+    const response = await fetch(`${baseUrl}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password, role }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data = await response.json();
+    console.log('Login successful', data);
+
+   
+    localStorage.setItem('token', data.token);
+    navigate('/dashboard');
+
+  } catch (error) {
+    console.error('Login error:', error);
+    
+  }
+};
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center ">
