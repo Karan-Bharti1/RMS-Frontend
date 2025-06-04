@@ -29,7 +29,16 @@ const navigate=useNavigate()
     console.log('Login successful', data);
 
    
-    localStorage.setItem('token', data.token);
+   
+localStorage.setItem(
+      'userdata',
+      JSON.stringify({
+        token: data.token,
+        username: data.user.username,
+        userId: data.user._id,
+        role: data.user.role,
+      })
+    );
     navigate('/dashboard');
 
   } catch (error) {
@@ -44,7 +53,7 @@ const navigate=useNavigate()
         onSubmit={handleSubmit}
         className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md"
       >
-        <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6">RMS</h2>
 
         <div className="space-y-4">
           <input
@@ -65,15 +74,7 @@ const navigate=useNavigate()
             className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
 
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as Role)}
-            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          >
-            <option value="">Select Role</option>
-            <option value="engineer">Engineer</option>
-            <option value="manager">Manager</option>
-          </select>
+
 
           <button
             type="submit"
