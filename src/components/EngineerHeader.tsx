@@ -44,7 +44,7 @@ const handleLogOut = () => {
         <div className="md:hidden px-4 pb-4">
           <NavLink to="/engineer/profile" className="block text-indigo-700 py-1" onClick={toggleMenu}>My Profile</NavLink>
           <NavLink to="/engineer/assignments" className="block text-indigo-700 py-1" onClick={toggleMenu}>My Assignments</NavLink>
-<button onClick={handleLogOut}>Log Out</button>
+ <button onClick={handleLogOut} className="block text-indigo-700 py-1"><TbLogout/></button>
         </div>
       )}
     </header>

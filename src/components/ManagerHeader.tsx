@@ -42,10 +42,11 @@ const handleLogOut = () => {
       {/* Mobile Nav */}
       {isOpen && (
         <div className="md:hidden px-4 pb-4">
-          <NavLink to="/" className="block text-indigo-700 py-1" onClick={toggleMenu}>Home</NavLink>
+
           <NavLink to="/projects" className="block text-indigo-700 py-1" onClick={toggleMenu}>Projects</NavLink>
           <NavLink to="/engineers" className="block text-indigo-700 py-1" onClick={toggleMenu}>Engineers</NavLink>
           <NavLink to="/assignments" className="block text-indigo-700 py-1" onClick={toggleMenu}>Assignments</NavLink>
+           <button onClick={handleLogOut} className="block text-indigo-700 py-1"><TbLogout/></button>
         </div>
       )}
     </header>
