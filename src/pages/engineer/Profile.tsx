@@ -49,7 +49,7 @@ const Profile: React.FC = () => {
         const assignRes = await fetch(`${baseUrl}/engineer/${userId}`);
         const assignments: Assignment[] = await assignRes.json();
         const totalAllocated = assignments.reduce((sum, a) => sum + a.allocationPercentage, 0);
-        setAvailableCapacity(data.maxCapacity! - totalAllocated);
+        setAvailableCapacity(data.maxCapacity! - (isNaN(totalAllocated)?0:totalAllocated));
       } catch (err) {
         console.error('Failed to fetch profile/capacity:', err);
       } finally {
