@@ -22,7 +22,7 @@ const handleLogOut = () => {
         {/* Desktop Nav */}
       <nav className="hidden md:flex space-x-6">
   <NavLink to="/engineer/profile" className={({ isActive }) => `text-indigo-700 hover:underline ${isActive ? 'font-semibold' : ''}`}>My Profile</NavLink>
-  <NavLink to="/engineer/projects" className={({ isActive }) => `text-indigo-700 hover:underline ${isActive ? 'font-semibold' : ''}`}>Assignments </NavLink>
+  <NavLink to="/engineer/assignments" className={({ isActive }) => `text-indigo-700 hover:underline ${isActive ? 'font-semibold' : ''}`}>Assignments </NavLink>
   <button onClick={handleLogOut} className="block text-indigo-700 "><TbLogout/></button>
 </nav>
         {/* Mobile Menu Button */}
