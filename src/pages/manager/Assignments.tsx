@@ -6,7 +6,7 @@ import ManagerHeader from '@/components/ManagerHeader';
 import { useProjects } from '@/contexts/projectContext';
 import { useEngineers } from '@/contexts/userContext';
 import { useAssignments } from '@/contexts/assignmentContext';
-
+import { useNavigate } from 'react-router-dom';
 interface AssignmentFormInputs {
   engineerId: string;
   projectId: string;
@@ -42,31 +42,17 @@ const Assignment: React.FC = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState<AssignmentType | null>(null);
-
-  // Enhanced debug logging
+ const navigate=useNavigate()
+    const storedUserData = localStorage.getItem('userdata');
+  const userData = storedUserData ? JSON.parse(storedUserData) : null;
   useEffect(() => {
-    console.log('=== Assignment Component Debug ===');
-    console.log('Engineers data:', engineers);
-    console.log('Engineers type:', typeof engineers);
-    console.log('Engineers length:', engineers?.length);
-    console.log('Sample engineer:', engineers?.[0]);
-    
-    console.log('Projects data:', projects);
-    console.log('Projects type:', typeof projects);
-    console.log('Projects length:', projects?.length);
-    console.log('Sample project:', projects?.[0]);
-    
-    console.log('Assignments data:', assignments);
-    console.log('Assignments type:', typeof assignments);
-    console.log('Assignments length:', assignments?.length);
-    console.log('Sample assignment:', assignments?.[0]);
-    
-    // Log engineer IDs in assignments vs available engineers
-    if (assignments?.length > 0 && engineers?.length > 0) {
-      console.log('Assignment engineer IDs:', assignments.map(a => a.engineerId));
-      console.log('Available engineer IDs:', engineers.map(e => e._id || e.id));
+    // Check if userData exists and has a token
+    if (!userData || !userData.token) {
+      navigate('/login');
     }
-  }, [assignments, engineers, projects]);
+  }, [navigate, userData]);
+  
+
 
   const {
     register,

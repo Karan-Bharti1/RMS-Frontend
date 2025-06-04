@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import EngineerHeader from '@/components/EngineerHeader';
 import { baseUrl } from '@/url';
-
+import { useNavigate } from 'react-router-dom';
 interface Assignment {
   _id: string;
   engineerId: string;
@@ -15,7 +15,15 @@ interface Assignment {
 const EngineerAssignments: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
-
+ const navigate=useNavigate()
+    const storedUserData = localStorage.getItem('userdata');
+  const userData = storedUserData ? JSON.parse(storedUserData) : null;
+  useEffect(() => {
+    // Check if userData exists and has a token
+    if (!userData || !userData.token) {
+      navigate('/login');
+    }
+  }, [navigate, userData]);
   useEffect(() => {
     const fetchAssignments = async () => {
       const local = localStorage.getItem('userdata');

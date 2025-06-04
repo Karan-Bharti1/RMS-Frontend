@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { baseUrl } from '@/url';
-import EngineerHeader from '@/components/EngineerHeader';
-import ManagerHeader from '@/components/ManagerHeader';
 
+import ManagerHeader from '@/components/ManagerHeader';
+import { useNavigate } from 'react-router-dom';
 interface Engineer {
   _id: string;
   username: string;
@@ -22,7 +22,15 @@ interface EngineerWithCapacity extends Engineer {
 const Engineers: React.FC = () => {
   const [engineers, setEngineers] = useState<EngineerWithCapacity[]>([]);
   const [loading, setLoading] = useState(true);
-
+    const navigate=useNavigate()
+    const storedUserData = localStorage.getItem('userdata');
+  const userData = storedUserData ? JSON.parse(storedUserData) : null;
+  useEffect(() => {
+    // Check if userData exists and has a token
+    if (!userData || !userData.token) {
+      navigate('/login');
+    }
+  }, [navigate, userData]);
   useEffect(() => {
     const fetchEngineers = async () => {
       try {

@@ -7,7 +7,8 @@ const EngineerHeader: React.FC = () => {
 const navigate=useNavigate()
   const toggleMenu = () => setIsOpen(!isOpen);
 const handleLogOut = () => {
-  localStorage.removeItem("userData"); 
+  localStorage.removeItem("userdata"); 
+  localStorage.clear()
   navigate("/login");                 
 };
 

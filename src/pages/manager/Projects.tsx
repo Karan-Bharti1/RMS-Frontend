@@ -6,7 +6,7 @@ import axios from 'axios';
 import { baseUrl } from '@/url';
 import { FiX } from 'react-icons/fi';
 import { useProjects } from '@/contexts/projectContext';
-
+import { useNavigate } from 'react-router-dom';
 interface ProjectFormInputs {
   name: string;
   description: string;
@@ -22,6 +22,9 @@ const Projects: React.FC = () => {
   const [editMode, setEditMode] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<any>(null);
   const [searchStatus, setSearchStatus] = useState('');
+  const navigate=useNavigate()
+  
+
 
   const {
     register,
@@ -33,7 +36,12 @@ const Projects: React.FC = () => {
   const storedUserData = localStorage.getItem('userdata');
   const userData = storedUserData ? JSON.parse(storedUserData) : null;
   const managerId = userData?.userId || '';
-
+  useEffect(() => {
+    // Check if userData exists and has a token
+    if (!userData || !userData.token) {
+      navigate('/login');
+    }
+  }, [navigate, userData]);
   const { projects, fetchProjects, addProject } = useProjects();
 
   useEffect(() => {

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Pencil, X, Check } from 'lucide-react';
 import EngineerHeader from '@/components/EngineerHeader';
 import { baseUrl } from '@/url';
-
+import { useNavigate } from 'react-router-dom';
 interface User {
   username: string;
   email?: string;
@@ -32,7 +32,15 @@ const Profile: React.FC = () => {
     setValue,
     formState: { errors },
   } = useForm<User>();
-
+ const navigate=useNavigate()
+    const storedUserData = localStorage.getItem('userdata');
+  const userdata = storedUserData ? JSON.parse(storedUserData) : null;
+  useEffect(() => {
+    // Check if userData exists and has a token
+    if (!userdata || !userdata.token) {
+      navigate('/login');
+    }
+  }, [navigate, userData]);
   useEffect(() => {
     const fetchUserAndCapacity = async () => {
       const local = localStorage.getItem('userdata');
