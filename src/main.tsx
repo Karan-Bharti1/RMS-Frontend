@@ -11,6 +11,7 @@ import { ProjectsProvider } from './contexts/projectContext.tsx'
 import { EngineerProvider } from './contexts/userContext.tsx'
 import { AssignmentProvider } from './contexts/assignmentContext.tsx'
 import Assignment from './pages/manager/Assignments.tsx'
+import Profile from './pages/engineer/Profile.tsx'
 const router=createBrowserRouter([{
   path:"/dashboard",
   element:<App/>
@@ -29,6 +30,9 @@ const router=createBrowserRouter([{
 },{
   path:"/assignments",
   element:<Assignment/>
+},{
+  path:"/engineer/profile",
+  element:<Profile/>
 }])
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
