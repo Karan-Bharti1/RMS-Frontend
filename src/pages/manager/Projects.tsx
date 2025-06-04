@@ -50,11 +50,11 @@ const Projects: React.FC = () => {
 
     try {
       if (editMode && projectToEdit) {
-        // For updating a project
+        // Updating a project
         const response = await axios.post(`${baseUrl}/update/${projectToEdit._id}`, projectData);
         console.log('Project updated:', response.data);
       } else {
-        // For creating a new project
+        // Creating a new project
         const response = await axios.post(`${baseUrl}/projects`, projectData);
         console.log('Project submitted successfully:', response.data);
         addProject(response.data);
@@ -88,53 +88,61 @@ const Projects: React.FC = () => {
           </button>
         </div>
 
-        <div className="mt-6 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <div key={project._id} className="border p-5 rounded-2xl shadow-lg bg-white space-y-2">
-              <div className="flex justify-between items-center">
-                <h3 className="font-bold text-xl text-indigo-600">{project.name}</h3>
-                <span className={`text-sm px-2 py-1 rounded-full ${
-                  project.status === 'active' ? 'bg-green-100 text-green-600' :
-                  project.status === 'planning' ? 'bg-yellow-100 text-yellow-600' :
-                  'bg-gray-100 text-gray-600'
-                }`}>
-                  {project.status}
-                </span>
-              </div>
-
-              <p className="text-gray-700">{project.description}</p>
-
-              <div className="text-sm text-gray-600 space-y-1">
-                <p><strong>Start:</strong> {new Date(project.startDate).toLocaleDateString()}</p>
-                <p><strong>End:</strong> {new Date(project.endDate).toLocaleDateString()}</p>
-                <p><strong>Team Size:</strong> {project.teamSize}</p>
-                <p><strong>Skills:</strong> {project.requiredSkills?.join(', ') || 'N/A'}</p>
-                <p><strong>Manager:</strong> {project.managerId?.username || 'Not Assigned'}</p>
-              </div>
-
-              <div className="text-right">
-                <button
-                  onClick={() => {
-                    setEditMode(true);
-                    setProjectToEdit(project);
-                    reset({
-                      name: project.name,
-                      description: project.description,
-                      startDate: project.startDate?.slice(0, 10),
-                      endDate: project.endDate?.slice(0, 10),
-                      requiredSkills: project.requiredSkills.join(', '),
-                      teamSize: project.teamSize,
-                      status: project.status,
-                    });
-                    setShowForm(true);
-                  }}
-                  className="text-indigo-600 hover:underline text-sm"
-                >
-                  ✏️ Edit
-                </button>
-              </div>
+        <div className="mt-6">
+          {projects.length === 0 ? (
+            <div className="text-center text-gray-500 text-lg mt-10">
+              No projects found. Click on <span className="font-semibold text-indigo-600">+ Add Project</span> to create one.
             </div>
-          ))}
+          ) : (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.map((project) => (
+                <div key={project._id} className="border p-5 rounded-2xl shadow-lg bg-white space-y-2">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-xl text-indigo-600">{project.name}</h3>
+                    <span className={`text-sm px-2 py-1 rounded-full ${
+                      project.status === 'active' ? 'bg-green-100 text-green-600' :
+                      project.status === 'planning' ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {project.status}
+                    </span>
+                  </div>
+
+                  <p className="text-gray-700">{project.description}</p>
+
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p><strong>Start:</strong> {new Date(project.startDate).toLocaleDateString()}</p>
+                    <p><strong>End:</strong> {new Date(project.endDate).toLocaleDateString()}</p>
+                    <p><strong>Team Size:</strong> {project.teamSize}</p>
+                    <p><strong>Skills:</strong> {project.requiredSkills?.join(', ') || 'N/A'}</p>
+                    <p><strong>Manager:</strong> {project.managerId?.username || 'Not Assigned'}</p>
+                  </div>
+
+                  <div className="text-right">
+                    <button
+                      onClick={() => {
+                        setEditMode(true);
+                        setProjectToEdit(project);
+                        reset({
+                          name: project.name,
+                          description: project.description,
+                          startDate: project.startDate?.slice(0, 10),
+                          endDate: project.endDate?.slice(0, 10),
+                          requiredSkills: project.requiredSkills.join(', '),
+                          teamSize: project.teamSize,
+                          status: project.status,
+                        });
+                        setShowForm(true);
+                      }}
+                      className="text-indigo-600 hover:underline text-sm"
+                    >
+                      ✏️ Edit
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {showForm && (
