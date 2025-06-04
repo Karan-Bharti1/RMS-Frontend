@@ -13,9 +13,9 @@ const handleLogOut = () => {
     <header className="bg-gradient-to-r from-blue-100 to-indigo-200 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
         {/* Logo */}
-        <div className="text-xl font-bold text-indigo-800">
+        <NavLink to="/dashboard" className="text-xl font-bold text-indigo-800">
           RMS
-        </div>
+        </NavLink>
 
         {/* Desktop Nav */}
       <nav className="hidden md:flex space-x-6">
