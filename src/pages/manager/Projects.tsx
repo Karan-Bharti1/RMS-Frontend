@@ -2,7 +2,7 @@ import ManagerHeader from '@/components/ManagerHeader';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
-import axios from "axios";
+import axios from 'axios';
 import { baseUrl } from '@/url';
 import { FiX } from 'react-icons/fi';
 import { useProjects } from '@/contexts/projectContext';
@@ -21,6 +21,7 @@ const Projects: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<any>(null);
+  const [searchStatus, setSearchStatus] = useState('');
 
   const {
     register,
@@ -39,6 +40,10 @@ const Projects: React.FC = () => {
     fetchProjects();
   }, [fetchProjects]);
 
+  const filteredProjects = searchStatus
+    ? projects.filter((project) => project.status.toLowerCase().includes(searchStatus.toLowerCase()))
+    : projects;
+
   const onSubmit: SubmitHandler<ProjectFormInputs> = async (data) => {
     const projectData = {
       ...data,
@@ -50,13 +55,9 @@ const Projects: React.FC = () => {
 
     try {
       if (editMode && projectToEdit) {
-        // Updating a project
-        const response = await axios.post(`${baseUrl}/update/${projectToEdit._id}`, projectData);
-        console.log('Project updated:', response.data);
+        await axios.post(`${baseUrl}/update/${projectToEdit._id}`, projectData);
       } else {
-        // Creating a new project
         const response = await axios.post(`${baseUrl}/projects`, projectData);
-        console.log('Project submitted successfully:', response.data);
         addProject(response.data);
       }
 
@@ -64,7 +65,7 @@ const Projects: React.FC = () => {
       setEditMode(false);
       setProjectToEdit(null);
       reset();
-      fetchProjects(); // Refresh the list
+      fetchProjects();
     } catch (error) {
       console.error('Error submitting project:', error);
     }
@@ -74,7 +75,15 @@ const Projects: React.FC = () => {
     <>
       <ManagerHeader />
       <div className="relative p-4">
-        <div className="flex justify-end">
+        {/* Top bar with Search and Add */}
+        <div className="flex flex-col sm:flex-row sm:justify-end sm:items-center gap-2 mb-4">
+          <input
+            type="text"
+            placeholder="Search by status..."
+            value={searchStatus}
+            onChange={(e) => setSearchStatus(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-2 w-full sm:w-60"
+          />
           <button
             onClick={() => {
               setShowForm(true);
@@ -88,14 +97,15 @@ const Projects: React.FC = () => {
           </button>
         </div>
 
+        {/* Projects Grid */}
         <div className="mt-6">
-          {projects.length === 0 ? (
+          {filteredProjects.length === 0 ? (
             <div className="text-center text-gray-500 text-lg mt-10">
-              No projects found. Click on <span className="font-semibold text-indigo-600">+ Add Project</span> to create one.
+              No matching projects found.
             </div>
           ) : (
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {projects.map((project) => (
+              {filteredProjects.map((project) => (
                 <div key={project._id} className="border p-5 rounded-2xl shadow-lg bg-white space-y-2">
                   <div className="flex justify-between items-center">
                     <h3 className="font-bold text-xl text-indigo-600">{project.name}</h3>
@@ -145,6 +155,7 @@ const Projects: React.FC = () => {
           )}
         </div>
 
+        {/* Form Popup */}
         {showForm && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl relative">
