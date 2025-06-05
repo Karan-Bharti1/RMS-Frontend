@@ -1,80 +1,45 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseUrl } from '../url';
 
-export interface Assignment {
-  _id: string;
-  engineerId: string;
-  projectId: string;
-  allocationPercentage: number;
-  startDate: string;
-  endDate?: string;
-  role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
-}
+const AssignmentContext = createContext(undefined);
 
-// Define the input type for creating/updating assignments
-export interface AssignmentInput {
-  engineerId: string;
-  projectId: string;
-  allocationPercentage: number;
-  startDate: string;
-  endDate?: string;
-  role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
-}
-
-interface AssignmentContextType {
-  assignments: Assignment[];
-  fetchAssignments: () => Promise<void>;
-  createAssignment: (data: AssignmentInput) => Promise<void>;
-  updateAssignment: (id: string, data: AssignmentInput) => Promise<void>;
-  loading: boolean;
-  error: string | null;
-}
-
-const AssignmentContext = createContext<AssignmentContextType | undefined>(undefined);
-
-interface AssignmentProviderProps {
-  children: ReactNode;
-}
-
-export const AssignmentProvider: React.FC<AssignmentProviderProps> = ({ children }) => {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+export const AssignmentProvider = ({ children }: { children: React.ReactNode }) => {
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Fetch assignments from backend
-  const fetchAssignments = async (): Promise<void> => {
+  const fetchAssignments = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get<Assignment[]>(`${baseUrl}/assignments`);
+      const response = await axios.get(`${baseUrl}/assignments`);
       
       setAssignments(response.data);
       console.log('Assignments fetched:', response.data);
       
-    } catch (error) {
+    } catch (error:any) {
       console.error('Error fetching assignments:', error);
       
-      if (axios.isAxiosError(error)) {
+      if (error.response) {
         console.error('Response status:', error.response?.status);
         console.error('Response data:', error.response?.data);
         setError(error.response?.data?.message || 'Failed to fetch assignments');
-      } else {
-        setError('An unexpected error occurred');
-      }
+      } 
     } finally {
       setLoading(false);
     }
   };
 
   // Create a new assignment & refresh list
-  const createAssignment = async (data: AssignmentInput): Promise<void> => {
+  const createAssignment = async (data: any) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.post<Assignment>(`${baseUrl}/assignments`, data, {
+      const response = await axios.post(`${baseUrl}/assignments`, data, {
         headers: { 'Content-Type': 'application/json' },
       });
       
@@ -84,11 +49,12 @@ export const AssignmentProvider: React.FC<AssignmentProviderProps> = ({ children
     } catch (error) {
       console.error('Error creating assignment:', error);
       
-      if (axios.isAxiosError(error)) {
-        setError(error.response?.data?.message || 'Failed to create assignment');
-        throw new Error(error.response?.data?.message || 'Failed to create assignment');
+      if (error.response) {
+        const errorMessage = error.response?.data?.message || 'Failed to create assignment';
+        setError(errorMessage);
+        throw new Error(errorMessage);
       } else {
-        setError('An unexpected error occurred');
+        
         throw error;
       }
     } finally {
@@ -97,27 +63,27 @@ export const AssignmentProvider: React.FC<AssignmentProviderProps> = ({ children
   };
 
   // Update an existing assignment & refresh list
-  const updateAssignment = async (id: string, data: AssignmentInput): Promise<void> => {
+  const updateAssignment = async (id: any, data: any) => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await axios.put<Assignment>(`${baseUrl}/assignments/update/${id}`, data, {
+      const response = await axios.put(`${baseUrl}/assignments/update/${id}`, data, {
         headers: { 'Content-Type': 'application/json' },
       });
       
       console.log('Assignment updated successfully:', response.data);
       await fetchAssignments(); // Refresh the list
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error updating assignment:', error);
       
-      if (axios.isAxiosError(error)) {
+      if (error.response) {
         const errorMessage = error.response?.data?.message || `Failed to update assignment: ${error.response?.status}`;
         setError(errorMessage);
         throw new Error(errorMessage);
       } else {
-        setError('An unexpected error occurred');
+        
         throw error;
       }
     } finally {
@@ -129,7 +95,7 @@ export const AssignmentProvider: React.FC<AssignmentProviderProps> = ({ children
     fetchAssignments();
   }, []);
 
-  const contextValue: AssignmentContextType = {
+  const contextValue = {
     assignments,
     fetchAssignments,
     createAssignment,
@@ -145,7 +111,7 @@ export const AssignmentProvider: React.FC<AssignmentProviderProps> = ({ children
   );
 };
 
-export const useAssignments = (): AssignmentContextType => {
+export const useAssignments = () => {
   const context = useContext(AssignmentContext);
   if (!context) {
     throw new Error('useAssignments must be used within AssignmentProvider');

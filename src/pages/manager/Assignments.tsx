@@ -7,82 +7,36 @@ import { useEngineers } from '../../contexts/userContext';
 import { useProjects } from '../../contexts/projectContext';
 import ManagerHeader from '../../components/ManagerHeader';
 
-interface AssignmentFormInputs {
-  engineerId: string;
-  projectId: string;
-  allocationPercentage: number;
-  startDate: string;
-  endDate?: string;
-  role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
-}
+const roles = ['Developer', 'Tech Lead', 'QA', 'Manager'];
 
-// Updated to match your context interface
-interface AssignmentType {
-  _id: string;
-  engineerId: {
-    _id: string;
-    username?: string;
-    name?: string;
-    firstName?: string;
-    email?: string;
-  };
-  projectId: string;
-  allocationPercentage: number;
-  startDate: string;
-  endDate?: string;
-  role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
-}
-
-// Define Engineer interface
-interface Engineer {
-  _id: string;
-  id?: string;
-  username?: string;
-  name?: string;
-  firstName?: string;
-  email?: string;
-}
-
-// Define Project interface
-interface Project {
-  _id: string;
-  id?: string;
-  name?: string;
-  title?: string;
-}
-
-// Define UserData interface
-interface UserData {
-  token: string;
-  userId: string;
-}
-
-const roles: Array<'Developer' | 'Tech Lead' | 'QA' | 'Manager'> = [
-  'Developer', 
-  'Tech Lead', 
-  'QA', 
-  'Manager'
-];
-
-const Assignment: React.FC = () => {
+const Assignment = () => {
   const assignmentContext = useAssignments();
   const projectContext = useProjects();
   const engineerContext = useEngineers();
   const navigate = useNavigate();
 
-  // Safely extract data with proper typing
-  const assignments: AssignmentType[] = assignmentContext?.assignments || [];
+  // Safely extract data with fallbacks
+  const assignments = assignmentContext?.assignments || [];
   const createAssignment = assignmentContext?.createAssignment || (async () => {});
   const updateAssignment = assignmentContext?.updateAssignment || (async () => {});
-  const projects: Project[] = projectContext?.projects || [];
-  const engineers: Engineer[] = engineerContext?.engineers || [];
+  const projects = projectContext?.projects || [];
+  const engineers = engineerContext?.engineers || [];
 
-  const [showForm, setShowForm] = useState<boolean>(false);
-  const [editingAssignment, setEditingAssignment] = useState<AssignmentType | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState(null);
 
-  // Properly type userData
-  const storedUserData = localStorage.getItem('userdata');
-  const userData: UserData | null = storedUserData ? JSON.parse(storedUserData) : null;
+  // Get user data from localStorage
+  const getUserData = () => {
+    try {
+      const storedUserData = localStorage.getItem('userdata');
+      return storedUserData ? JSON.parse(storedUserData) : null;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
+  };
+
+  const userData = getUserData();
 
   useEffect(() => {
     // Check if userData exists and has a token
@@ -97,17 +51,24 @@ const Assignment: React.FC = () => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm<AssignmentFormInputs>();
+  } = useForm();
 
-  const onSubmit = async (data: AssignmentFormInputs): Promise<void> => {
+  const onSubmit = async (data) => {
     try {
       console.log('Submitting assignment data:', data);
+      
+      // Convert allocationPercentage to number
+      const formattedData = {
+        ...data,
+        allocationPercentage: Number(data.allocationPercentage)
+      };
+
       if (editingAssignment) {
         // Update existing assignment
-        await updateAssignment(editingAssignment._id, data);
+        await updateAssignment(editingAssignment._id, formattedData);
       } else {
         // Create new assignment
-        await createAssignment(data);
+        await createAssignment(formattedData);
       }
       closeForm();
     } catch (error) {
@@ -115,79 +76,66 @@ const Assignment: React.FC = () => {
     }
   };
 
-  const closeForm = (): void => {
+  const closeForm = () => {
     setShowForm(false);
     setEditingAssignment(null);
     reset();
   };
 
-  const openCreateForm = (): void => {
+  const openCreateForm = () => {
     setEditingAssignment(null);
     setShowForm(true);
     reset();
   };
 
-  const openEditForm = (assignment: AssignmentType): void => {
+  const openEditForm = (assignment) => {
     setEditingAssignment(assignment);
     setShowForm(true);
     
     // Pre-fill form with existing data
-    setValue('engineerId', assignment.engineerId._id);
+    const engineerId = typeof assignment.engineerId === 'object' ? assignment.engineerId._id : assignment.engineerId;
+    
+    setValue('engineerId', engineerId);
     setValue('projectId', assignment.projectId);
     setValue('allocationPercentage', assignment.allocationPercentage);
-    setValue('startDate', assignment.startDate.split('T')[0]); // Format date for input
+    setValue('startDate', assignment.startDate ? assignment.startDate.split('T')[0] : '');
     setValue('endDate', assignment.endDate ? assignment.endDate.split('T')[0] : '');
     setValue('role', assignment.role);
   };
 
-  // Enhanced helper function to safely get engineer name
-  const getEngineerName = (engineerId: string | { _id: string; username?: string; name?: string; firstName?: string; email?: string }): string => {
-    console.log(`Getting engineer name for ID:`, engineerId);
-    
-    // Handle case where engineerId is an object (populated)
-    if (typeof engineerId === 'object' && engineerId !== null) {
-      const displayName = engineerId.username || engineerId.name || engineerId.firstName || engineerId.email || 'Unknown Engineer';
-      return String(displayName);
+  // Helper function to safely get engineer name
+  const getEngineerName = (engineerData) => {
+    // Handle case where engineerData is an object (populated)
+    if (typeof engineerData === 'object' && engineerData !== null) {
+      return engineerData.username || engineerData.name || engineerData.firstName || engineerData.email || 'Unknown Engineer';
     }
     
-    // Handle case where engineerId is a string
-    if (!engineerId || typeof engineerId !== 'string') {
-      console.log('No engineer ID provided or invalid type');
+    // Handle case where engineerData is a string (ID)
+    if (!engineerData || typeof engineerData !== 'string') {
       return 'No Engineer Assigned';
     }
     
     if (!Array.isArray(engineers) || engineers.length === 0) {
-      console.log('Engineers array is empty or not an array');
-      return `Engineer ID: ${engineerId}`;
+      return `Engineer ID: ${engineerData}`;
     }
     
-    // Try to find the engineer
-    const engineer = engineers.find(e => e && e._id === engineerId);
+    // Try to find the engineer by ID
+    const engineer = engineers.find(e => e && e._id === engineerData);
     
     if (!engineer) {
-      return `Engineer ID: ${engineerId}`;
+      return `Engineer ID: ${engineerData}`;
     }
     
-    console.log('Found engineer:', engineer);
-    
-    // Get the display name
-    const displayName = engineer.username || engineer.name || engineer.firstName || engineer.email || 'Unknown Engineer';
-    console.log(`Engineer display name: ${displayName}`);
-    
-    return String(displayName);
+    return engineer.username 
   };
 
-  // Enhanced helper function to safely get project name
-  const getProjectName = (projectId: string): string => {
-    console.log(`Getting project name for ID: ${projectId}`);
-    
+  // Helper function to safely get project name
+  const getProjectName = (projectId: any) => {
     if (!projectId) {
-      console.log('No project ID provided');
       return 'No Project Assigned';
     }
     
     if (!Array.isArray(projects) || projects.length === 0) {
-      console.log('Projects array is empty or not an array');
       return `Project ID: ${projectId}`;
     }
     
@@ -198,17 +146,11 @@ const Assignment: React.FC = () => {
       return `Project ID: ${projectId}`;
     }
     
-    console.log('Found project:', project);
-    
-    // Get the display name
-    const displayName = project.name || project.title || 'Unknown Project';
-    console.log(`Project display name: ${displayName}`);
-    
-    return String(displayName);
+    return project.name || 'Unnamed Project';
   };
 
   // Helper function to safely format date
-  const formatDate = (dateString: string): string => {
+  const formatDate = (dateString: any) => {
     try {
       if (!dateString) return 'N/A';
       return new Date(dateString).toLocaleDateString();
@@ -236,7 +178,7 @@ const Assignment: React.FC = () => {
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.isArray(assignments) && assignments.length > 0 ? (
             assignments.map((assignment) => {
-              // Ensure assignment is a valid object
+              // Ensure assignment is valid
               if (!assignment || typeof assignment !== 'object' || !assignment._id) {
                 return null;
               }
@@ -256,27 +198,27 @@ const Assignment: React.FC = () => {
                   </button>
 
                   <h3 className="text-lg font-semibold text-indigo-600 pr-8">
-                    {String(assignment.role || 'Unknown Role')}
+                    {assignment.role || 'Unknown Role'}
                   </h3>
                   
                   <div className="space-y-1 text-sm">
                     <p>
                       <span className="font-medium text-gray-700">Engineer:</span>{' '}
-                      <span className="text-gray-900" title={`Engineer ID: ${typeof assignment.engineerId === 'object' ? assignment.engineerId._id : assignment.engineerId}`}>
+                      <span className="text-gray-900">
                         {engineerName}
                       </span>
                     </p>
                     
                     <p>
                       <span className="font-medium text-gray-700">Project:</span>{' '}
-                      <span className="text-gray-900" title={`Project ID: ${assignment.projectId}`}>
+                      <span className="text-gray-900">
                         {projectName}
                       </span>
                     </p>
                     
                     <p>
                       <span className="font-medium text-gray-700">Allocation:</span>{' '}
-                      <span className="text-gray-900">{String(assignment.allocationPercentage || 0)}%</span>
+                      <span className="text-gray-900">{assignment.allocationPercentage || 0}%</span>
                     </p>
                     
                     <p>
@@ -296,7 +238,7 @@ const Assignment: React.FC = () => {
             }).filter(Boolean) // Remove any null entries
           ) : (
             <div className="col-span-full text-center py-8 text-gray-500">
-              {assignments === null || assignments === undefined ? (
+              {!assignments ? (
                 <div>
                   <p>Loading assignments...</p>
                   <div className="mt-2 text-xs">
@@ -339,19 +281,16 @@ const Assignment: React.FC = () => {
                   >
                     <option value="" disabled>Select engineer</option>
                     {Array.isArray(engineers) && engineers.map((eng) => {
-                      if (!eng || (!eng._id && !eng.id)) return null;
-                      const id = eng._id || eng.id;
-                      const displayName = eng.name || eng.username || eng.firstName || eng.email || 'Unknown Engineer';
+                      if (!eng || !eng._id) return null;
+                      const displayName = eng.name || eng.username 
                       return (
-                        <option key={id} value={id}>
-                          {String(displayName)}
+                        <option key={eng._id} value={eng._id}>
+                          {displayName}
                         </option>
                       );
                     }).filter(Boolean)}
                   </select>
-                  {errors.engineerId && (
-                    <p className="text-red-600 text-sm mt-1">{errors.engineerId.message}</p>
-                  )}
+          
                 </div>
 
                 <div>
@@ -365,19 +304,16 @@ const Assignment: React.FC = () => {
                   >
                     <option value="" disabled>Select project</option>
                     {Array.isArray(projects) && projects.map((project) => {
-                      if (!project || (!project._id && !project.id)) return null;
-                      const id = project._id || project.id;
-                      const displayName = project.name || project.title || 'Unnamed Project';
+                      if (!project || !project._id) return null;
+                      const displayName = project.name ||'Unnamed Project';
                       return (
-                        <option key={id} value={id}>
-                          {String(displayName)}
+                        <option key={project._id} value={project._id}>
+                          {displayName}
                         </option>
                       );
                     }).filter(Boolean)}
                   </select>
-                  {errors.projectId && (
-                    <p className="text-red-600 text-sm mt-1">{errors.projectId.message}</p>
-                  )}
+                
                 </div>
 
                 <div>
@@ -396,9 +332,7 @@ const Assignment: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  {errors.role && (
-                    <p className="text-red-600 text-sm mt-1">{errors.role.message}</p>
-                  )}
+                
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -411,9 +345,7 @@ const Assignment: React.FC = () => {
                       {...register('startDate', { required: 'Start date is required' })}
                       className="border border-gray-300 p-2 rounded-md w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
-                    {errors.startDate && (
-                      <p className="text-red-600 text-sm mt-1">{errors.startDate.message}</p>
-                    )}
+                   
                   </div>
 
                   <div>
@@ -440,14 +372,11 @@ const Assignment: React.FC = () => {
                       required: 'Allocation is required',
                       min: { value: 0, message: 'Minimum allocation is 0%' },
                       max: { value: 100, message: 'Maximum allocation is 100%' },
-                      valueAsNumber: true,
                     })}
                     className="border border-gray-300 p-2 rounded-md w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="e.g., 50"
                   />
-                  {errors.allocationPercentage && (
-                    <p className="text-red-600 text-sm mt-1">{errors.allocationPercentage.message}</p>
-                  )}
+            
                 </div>
 
                 <div className="flex gap-3 pt-4">
