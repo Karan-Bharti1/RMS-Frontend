@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { baseUrl } from '@/url';
 
-import ManagerHeader from '@/components/ManagerHeader';
+
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../../url';
+import ManagerHeader from '../../components/ManagerHeader';
 interface Engineer {
   _id: string;
   username: string;

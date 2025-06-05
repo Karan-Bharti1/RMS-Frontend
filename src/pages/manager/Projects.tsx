@@ -1,12 +1,15 @@
-import ManagerHeader from '@/components/ManagerHeader';
+
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import axios from 'axios';
-import { baseUrl } from '@/url';
+
 import { FiX } from 'react-icons/fi';
-import { useProjects } from '@/contexts/projectContext';
+
 import { useNavigate } from 'react-router-dom';
+import { useProjects } from '../../contexts/projectContext';
+import { baseUrl } from '../../url';
+import ManagerHeader from '../../components/ManagerHeader';
 interface ProjectFormInputs {
   name: string;
   description: string;

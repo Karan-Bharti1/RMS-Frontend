@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Pencil, X, Check } from 'lucide-react';
-import EngineerHeader from '@/components/EngineerHeader';
-import { baseUrl } from '@/url';
+
+
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../../url';
+import EngineerHeader from '../../components/EngineerHeader';
 interface User {
   username: string;
   email?: string;

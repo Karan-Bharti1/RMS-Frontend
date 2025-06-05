@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import EngineerHeader from '@/components/EngineerHeader';
-import { baseUrl } from '@/url';
+
 import { useNavigate } from 'react-router-dom';
+import { baseUrl } from '../../url';
 interface Assignment {
   _id: string;
   engineerId: string;

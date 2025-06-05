@@ -7,7 +7,10 @@ import {
   Legend,
 } from 'chart.js';
 import ManagerHeader from './ManagerHeader';
-import { baseUrl } from '@/url';
+import { baseUrl } from '../url';
+
+
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 interface ManagerDashboardProps {

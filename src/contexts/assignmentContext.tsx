@@ -1,6 +1,7 @@
-import { baseUrl } from '@/url';
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import { baseUrl } from '../url';
 
 export interface Assignment {
   _id: string;

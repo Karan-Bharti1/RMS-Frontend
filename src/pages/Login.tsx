@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { baseUrl } from '@/url';
+import { baseUrl } from '../url';
+
 type Role = 'engineer' | 'manager';
 
 const Login: React.FC = () => {

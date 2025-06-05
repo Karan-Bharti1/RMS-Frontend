@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiX, FiEdit2 } from 'react-icons/fi';
-import ManagerHeader from '@/components/ManagerHeader';
 
-import { useProjects } from '@/contexts/projectContext';
-import { useEngineers } from '@/contexts/userContext';
-import { useAssignments } from '@/contexts/assignmentContext';
+
 import { useNavigate } from 'react-router-dom';
+import { useAssignments } from '../../contexts/assignmentContext';
+import { useEngineers } from '../../contexts/userContext';
+import { useProjects } from '../../contexts/projectContext';
+import ManagerHeader from '../../components/ManagerHeader';
 interface AssignmentFormInputs {
   engineerId: string;
   projectId: string;

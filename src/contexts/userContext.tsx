@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { baseUrl } from '@/url';
+import { baseUrl } from '../url';
 
 interface Engineer {
   _id: string;
