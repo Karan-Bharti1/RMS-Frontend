@@ -28,7 +28,7 @@ export const AssignmentProvider = ({ children }: { children: ReactNode }) => {
   const fetchAssignments = async () => {
     try {
       // Fixed: Using axios properly
-      const res = await axios.get(`http://localhost:5001/assignments`);
+      const res = await axios.get(`${baseUrl}/assignments`);
       
       // Fixed: axios response data is directly accessible via res.data
       setAssignments(res.data);

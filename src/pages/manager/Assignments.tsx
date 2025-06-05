@@ -174,7 +174,7 @@ const Assignment: React.FC = () => {
     let project = projects.find(p => p && p._id === projectId);
     
     if (!project) {
-      // Try with id field instead of _id
+    
       project = projects.find(p => p && p.id === projectId);
     }
     

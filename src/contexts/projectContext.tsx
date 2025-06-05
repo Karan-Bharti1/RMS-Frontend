@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import { baseUrl } from '@/url';
 
-const baseUrl = 'https://your-api-url.com'; // Replace with your actual base URL
+
 
 interface Project {
   id: string;
@@ -43,7 +44,7 @@ export const ProjectsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return;
       }
 
-      const res = await axios.get(`http://localhost:5001/projects/${managerId}`);
+      const res = await axios.get(`${baseUrl}/projects/${managerId}`);
       setProjects(res.data);
     } catch (error) {
       console.error('Failed to fetch projects:', error);

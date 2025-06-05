@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
+import { baseUrl } from '@/url';
 
 interface Engineer {
   _id: string;
@@ -25,7 +26,7 @@ export const EngineerProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const fetchEngineers = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/engineers');
+      const res = await axios.get(`${baseUrl}/engineers`);
       setEngineers(res.data);
     } catch (error) {
       console.error('Failed to fetch engineers:', error);
