@@ -50,10 +50,12 @@ const Engineers: React.FC = () => {
               const assignments: Assignment[] = Array.isArray(assignmentRes.data) ? assignmentRes.data : [];
 
               const used = assignments.reduce((sum, a) => sum + (a?.allocationPercentage || 0), 0);
-              const available = Math.max(0, engineer.maxCapacity - used);
+              const maxCap = engineer.maxCapacity || 0;
+              const available = Math.max(0, maxCap - used);
 
               return {
                 ...engineer,
+                maxCapacity: maxCap,
                 usedCapacity: used,
                 availableCapacity: available,
               };
@@ -61,8 +63,9 @@ const Engineers: React.FC = () => {
               console.warn(`Failed to fetch assignments for engineer ${engineer._id}:`, assignmentError);
               return {
                 ...engineer,
+                maxCapacity: engineer.maxCapacity || 0,
                 usedCapacity: 0,
-                availableCapacity: engineer.maxCapacity,
+                availableCapacity: engineer.maxCapacity || 0,
               };
             }
           })
@@ -108,7 +111,7 @@ const Engineers: React.FC = () => {
                     <strong>Skills:</strong> {eng.skills?.join(', ') || '—'}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <strong>Max Capacity:</strong> {eng.maxCapacity}
+                    <strong>Max Capacity:</strong> {eng.maxCapacity || 0}
                   </p>
                   
                   {/* Capacity Bar */}
