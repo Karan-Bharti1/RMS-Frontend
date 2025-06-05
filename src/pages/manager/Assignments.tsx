@@ -1,4 +1,4 @@
-mport React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiX, FiEdit2 } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
