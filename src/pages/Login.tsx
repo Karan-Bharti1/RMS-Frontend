@@ -7,7 +7,7 @@ type Role = 'engineer' | 'manager';
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [role, setRole] = useState<Role>('engineer');
+  const [role] = useState<Role>('engineer');
 const navigate=useNavigate()
  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();

@@ -7,26 +7,64 @@ import { useEngineers } from '../../contexts/userContext';
 import { useProjects } from '../../contexts/projectContext';
 import ManagerHeader from '../../components/ManagerHeader';
 
+// Define types
+interface Engineer {
+  _id: string;
+  username?: string;
+  name?: string;
+  firstName?: string;
+  email?: string;
+}
+
+interface Project {
+  _id: string;
+  name?: string;
+}
+
+interface Assignment {
+  _id: string;
+  engineerId: string | Engineer;
+  projectId: string;
+  role: string;
+  allocationPercentage: number;
+  startDate: string;
+  endDate?: string;
+}
+
+interface AssignmentFormData {
+  engineerId: string;
+  projectId: string;
+  role: string;
+  allocationPercentage: number;
+  startDate: string;
+  endDate?: string;
+}
+
+interface UserData {
+  token: string;
+  [key: string]: any;
+}
+
 const roles = ['Developer', 'Tech Lead', 'QA', 'Manager'];
 
-const Assignment = () => {
+const Assignment: React.FC = () => {
   const assignmentContext = useAssignments();
   const projectContext = useProjects();
   const engineerContext = useEngineers();
   const navigate = useNavigate();
 
   // Safely extract data with fallbacks
-  const assignments = assignmentContext?.assignments || [];
+  const assignments: Assignment[] = assignmentContext?.assignments || [];
   const createAssignment = assignmentContext?.createAssignment || (async () => {});
   const updateAssignment = assignmentContext?.updateAssignment || (async () => {});
-  const projects = projectContext?.projects || [];
-  const engineers = engineerContext?.engineers || [];
+  const projects: Project[] = projectContext?.projects || [];
+  const engineers: Engineer[] = engineerContext?.engineers || [];
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingAssignment, setEditingAssignment] = useState(null);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
 
   // Get user data from localStorage
-  const getUserData = () => {
+  const getUserData = (): UserData | null => {
     try {
       const storedUserData = localStorage.getItem('userdata');
       return storedUserData ? JSON.parse(storedUserData) : null;
@@ -51,9 +89,9 @@ const Assignment = () => {
     reset,
     setValue,
     formState: { errors },
-  } = useForm();
+  } = useForm<AssignmentFormData>();
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: AssignmentFormData): Promise<void> => {
     try {
       console.log('Submitting assignment data:', data);
       
@@ -76,19 +114,19 @@ const Assignment = () => {
     }
   };
 
-  const closeForm = () => {
+  const closeForm = (): void => {
     setShowForm(false);
     setEditingAssignment(null);
     reset();
   };
 
-  const openCreateForm = () => {
+  const openCreateForm = (): void => {
     setEditingAssignment(null);
     setShowForm(true);
     reset();
   };
 
-  const openEditForm = (assignment) => {
+  const openEditForm = (assignment: Assignment): void => {
     setEditingAssignment(assignment);
     setShowForm(true);
     
@@ -104,7 +142,7 @@ const Assignment = () => {
   };
 
   // Helper function to safely get engineer name
-  const getEngineerName = (engineerData) => {
+  const getEngineerName = (engineerData: string | Engineer | null | undefined): string => {
     // Handle case where engineerData is an object (populated)
     if (typeof engineerData === 'object' && engineerData !== null) {
       return engineerData.username || engineerData.name || engineerData.firstName || engineerData.email || 'Unknown Engineer';
@@ -126,11 +164,11 @@ const Assignment = () => {
       return `Engineer ID: ${engineerData}`;
     }
     
-    return engineer.username 
+    return engineer.username || engineer.name || engineer.firstName || engineer.email || 'Unknown Engineer';
   };
 
   // Helper function to safely get project name
-  const getProjectName = (projectId: any) => {
+  const getProjectName = (projectId: string | null | undefined): string => {
     if (!projectId) {
       return 'No Project Assigned';
     }
@@ -150,7 +188,7 @@ const Assignment = () => {
   };
 
   // Helper function to safely format date
-  const formatDate = (dateString: any) => {
+  const formatDate = (dateString: string | null | undefined): string => {
     try {
       if (!dateString) return 'N/A';
       return new Date(dateString).toLocaleDateString();
@@ -282,7 +320,7 @@ const Assignment = () => {
                     <option value="" disabled>Select engineer</option>
                     {Array.isArray(engineers) && engineers.map((eng) => {
                       if (!eng || !eng._id) return null;
-                      const displayName = eng.name || eng.username 
+                      const displayName = eng.name || eng.username || eng.firstName || eng.email || 'Unknown Engineer';
                       return (
                         <option key={eng._id} value={eng._id}>
                           {displayName}
@@ -290,7 +328,9 @@ const Assignment = () => {
                       );
                     }).filter(Boolean)}
                   </select>
-          
+                  {errors.engineerId && (
+                    <p className="text-red-500 text-xs mt-1">{errors.engineerId.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -305,7 +345,7 @@ const Assignment = () => {
                     <option value="" disabled>Select project</option>
                     {Array.isArray(projects) && projects.map((project) => {
                       if (!project || !project._id) return null;
-                      const displayName = project.name ||'Unnamed Project';
+                      const displayName = project.name || 'Unnamed Project';
                       return (
                         <option key={project._id} value={project._id}>
                           {displayName}
@@ -313,7 +353,9 @@ const Assignment = () => {
                       );
                     }).filter(Boolean)}
                   </select>
-                
+                  {errors.projectId && (
+                    <p className="text-red-500 text-xs mt-1">{errors.projectId.message}</p>
+                  )}
                 </div>
 
                 <div>
@@ -332,7 +374,9 @@ const Assignment = () => {
                       </option>
                     ))}
                   </select>
-                
+                  {errors.role && (
+                    <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -345,7 +389,9 @@ const Assignment = () => {
                       {...register('startDate', { required: 'Start date is required' })}
                       className="border border-gray-300 p-2 rounded-md w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
-                   
+                    {errors.startDate && (
+                      <p className="text-red-500 text-xs mt-1">{errors.startDate.message}</p>
+                    )}
                   </div>
 
                   <div>
@@ -376,7 +422,9 @@ const Assignment = () => {
                     className="border border-gray-300 p-2 rounded-md w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     placeholder="e.g., 50"
                   />
-            
+                  {errors.allocationPercentage && (
+                    <p className="text-red-500 text-xs mt-1">{errors.allocationPercentage.message}</p>
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">
