@@ -44,30 +44,18 @@ const Engineers: React.FC = () => {
         const data = res.data;
 
         const enrichedData = await Promise.all(
-          data.map(async (engineer: any) => {
-            try {
-              const assignmentRes = await axios.get(`${baseUrl}/engineer/${engineer._id}`);
-              const assignments: Assignment[] = Array.isArray(assignmentRes.data) ? assignmentRes.data : [];
+          data.map(async (engineer:any) => {
+            const assignmentRes = await axios.get(`${baseUrl}/engineer/${engineer._id}`);
+            const assignments: Assignment[] = assignmentRes.data;
 
-              const used = assignments.reduce((sum, a) => sum + (a?.allocationPercentage || 0), 0);
-              const maxCap = engineer.maxCapacity || 0;
-              const available = Math.max(0, maxCap - used);
+            const used = assignments.reduce((sum, a) => sum + a.allocationPercentage, 0);
+            const available = engineer.maxCapacity - used;
 
-              return {
-                ...engineer,
-                maxCapacity: maxCap,
-                usedCapacity: used,
-                availableCapacity: available,
-              };
-            } catch (assignmentError) {
-              console.warn(`Failed to fetch assignments for engineer ${engineer._id}:`, assignmentError);
-              return {
-                ...engineer,
-                maxCapacity: engineer.maxCapacity || 0,
-                usedCapacity: 0,
-                availableCapacity: engineer.maxCapacity || 0,
-              };
-            }
+            return {
+              ...engineer,
+              usedCapacity: used,
+              availableCapacity: available,
+            };
           })
         );
 
@@ -79,10 +67,8 @@ const Engineers: React.FC = () => {
       }
     };
 
-    if (userData?.token) {
-      fetchEngineers();
-    }
-  }, [userData?.token]);
+    fetchEngineers();
+  }, []);
 
   if (loading) return <div className="p-6 text-center text-lg text-gray-600">Loading engineers...</div>;
 
@@ -99,7 +85,7 @@ const Engineers: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {engineers.map((eng) => {
-              const percentUsed = eng.maxCapacity > 0 ? Math.round((eng.usedCapacity / eng.maxCapacity) * 100) : 0;
+              const percentUsed = Math.round((eng.usedCapacity / eng.maxCapacity) * 100);
               
               return (
                 <div
@@ -111,7 +97,7 @@ const Engineers: React.FC = () => {
                     <strong>Skills:</strong> {eng.skills?.join(', ') || '—'}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <strong>Max Capacity:</strong> {eng.maxCapacity || 0}
+                    <strong>Max Capacity:</strong> {eng.maxCapacity}
                   </p>
                   
                   {/* Capacity Bar */}
@@ -120,7 +106,7 @@ const Engineers: React.FC = () => {
                     <div className="w-full h-4 bg-indigo-100 rounded-full overflow-hidden mt-1">
                       <div
                         className="h-full bg-gradient-to-r from-green-400 via-yellow-400 to-red-400 transition-all duration-300"
-                        style={{ width: `${Math.min(100, percentUsed)}%` }}
+                        style={{ width: `${percentUsed}%` }}
                       />
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
