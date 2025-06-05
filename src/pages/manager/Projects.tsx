@@ -1,15 +1,13 @@
-
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import axios from 'axios';
-
 import { FiX } from 'react-icons/fi';
-
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../../contexts/projectContext';
 import { baseUrl } from '../../url';
 import ManagerHeader from '../../components/ManagerHeader';
+
 interface ProjectFormInputs {
   name: string;
   description: string;
@@ -20,14 +18,36 @@ interface ProjectFormInputs {
   status: 'planning' | 'active' | 'completed';
 }
 
-const Projects: React.FC = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [projectToEdit, setProjectToEdit] = useState<any>(null);
-  const [searchStatus, setSearchStatus] = useState('');
-  const navigate=useNavigate()
-  
+// Define the Project interface to match your data structure
+interface Project {
+  _id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate?: string;
+  requiredSkills: string[];
+  teamSize: number;
+  status: 'planning' | 'active' | 'completed';
+  managerId: {
+    _id: string;
+    username?: string;
+  } | string;
+}
 
+// Define UserData interface
+interface UserData {
+  token: string;
+  userId: string;
+username:string;
+  role: 'manager' | 'engineer';
+}
+
+const Projects: React.FC = () => {
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [editMode, setEditMode] = useState<boolean>(false);
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
+  const [searchStatus, setSearchStatus] = useState<string>('');
+  const navigate = useNavigate();
 
   const {
     register,
@@ -36,15 +56,18 @@ const Projects: React.FC = () => {
     formState: { errors },
   } = useForm<ProjectFormInputs>();
 
+  // Properly type userData
   const storedUserData = localStorage.getItem('userdata');
-  const userData = storedUserData ? JSON.parse(storedUserData) : null;
+  const userData: UserData | null = storedUserData ? JSON.parse(storedUserData) : null;
   const managerId = userData?.userId || '';
+
   useEffect(() => {
     // Check if userData exists and has a token
     if (!userData || !userData.token) {
       navigate('/login');
     }
   }, [navigate, userData]);
+
   const { projects, fetchProjects, addProject } = useProjects();
 
   useEffect(() => {
@@ -55,7 +78,7 @@ const Projects: React.FC = () => {
     ? projects.filter((project) => project.status.toLowerCase().includes(searchStatus.toLowerCase()))
     : projects;
 
-  const onSubmit: SubmitHandler<ProjectFormInputs> = async (data) => {
+  const onSubmit: SubmitHandler<ProjectFormInputs> = async (data): Promise<void> => {
     const projectData = {
       ...data,
       managerId,
@@ -66,7 +89,8 @@ const Projects: React.FC = () => {
 
     try {
       if (editMode && projectToEdit) {
-        await axios.post(`${baseUrl}/update/${projectToEdit._id}`, projectData);
+        // Fixed: Use PUT method for updates and correct endpoint
+        await axios.put(`${baseUrl}/projects/update/${projectToEdit._id}`, projectData);
       } else {
         const response = await axios.post(`${baseUrl}/projects`, projectData);
         addProject(response.data);
@@ -76,10 +100,29 @@ const Projects: React.FC = () => {
       setEditMode(false);
       setProjectToEdit(null);
       reset();
-      fetchProjects();
+      await fetchProjects(); // Wait for fetch to complete
     } catch (error) {
       console.error('Error submitting project:', error);
     }
+  };
+
+  // Helper function to safely format date
+  const formatDate = (dateString: string | undefined): string => {
+    try {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleDateString();
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return 'Invalid Date';
+    }
+  };
+
+  // Helper function to get manager name
+  const getManagerName = (managerId: string | { _id: string; username?: string }): string => {
+    if (typeof managerId === 'object' && managerId !== null) {
+      return managerId.username || 'Not Assigned';
+    }
+    return 'Not Assigned';
   };
 
   return (
@@ -132,11 +175,11 @@ const Projects: React.FC = () => {
                   <p className="text-gray-700">{project.description}</p>
 
                   <div className="text-sm text-gray-600 space-y-1">
-                    <p><strong>Start:</strong> {new Date(project.startDate).toLocaleDateString()}</p>
-                    <p><strong>End:</strong> {new Date(project.endDate).toLocaleDateString()}</p>
+                    <p><strong>Start:</strong> {formatDate(project.startDate)}</p>
+                    <p><strong>End:</strong> {formatDate(project.endDate)}</p>
                     <p><strong>Team Size:</strong> {project.teamSize}</p>
                     <p><strong>Skills:</strong> {project.requiredSkills?.join(', ') || 'N/A'}</p>
-                    <p><strong>Manager:</strong> {project.managerId?.username || 'Not Assigned'}</p>
+                    <p><strong>Manager:</strong> {getManagerName(project.managerId)}</p>
                   </div>
 
                   <div className="text-right">
@@ -147,9 +190,9 @@ const Projects: React.FC = () => {
                         reset({
                           name: project.name,
                           description: project.description,
-                          startDate: project.startDate?.slice(0, 10),
-                          endDate: project.endDate?.slice(0, 10),
-                          requiredSkills: project.requiredSkills.join(', '),
+                          startDate: project.startDate?.slice(0, 10) || '',
+                          endDate: project.endDate?.slice(0, 10) || '',
+                          requiredSkills: project.requiredSkills?.join(', ') || '',
                           teamSize: project.teamSize,
                           status: project.status,
                         });
@@ -169,7 +212,7 @@ const Projects: React.FC = () => {
         {/* Form Popup */}
         {showForm && (
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl relative">
+            <div className="bg-white p-6 rounded-2xl shadow-lg w-full max-w-xl relative max-h-[90vh] overflow-y-auto">
               <button
                 onClick={() => {
                   setShowForm(false);
@@ -188,78 +231,105 @@ const Projects: React.FC = () => {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
-                  <label className="block font-medium">Project Name</label>
+                  <label className="block font-medium text-gray-700 mb-1">Project Name</label>
                   <input
                     {...register('name', { required: 'Name is required' })}
-                    className="border p-2 rounded w-full"
+                    className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter project name"
                   />
-                  {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-medium">Description</label>
+                  <label className="block font-medium text-gray-700 mb-1">Description</label>
                   <textarea
                     {...register('description')}
-                    className="border p-2 rounded w-full"
+                    className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    rows={3}
+                    placeholder="Enter project description"
                   />
                 </div>
 
                 <div className="flex gap-4">
                   <div className="flex-1">
-                    <label className="block font-medium">Start Date</label>
+                    <label className="block font-medium text-gray-700 mb-1">Start Date</label>
                     <input
                       type="date"
                       {...register('startDate', { required: 'Start date is required' })}
-                      className="border p-2 rounded w-full"
+                      className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
-                    {errors.startDate && <p className="text-red-500 text-sm">{errors.startDate.message}</p>}
+                    {errors.startDate && <p className="text-red-500 text-sm mt-1">{errors.startDate.message}</p>}
                   </div>
                   <div className="flex-1">
-                    <label className="block font-medium">End Date</label>
+                    <label className="block font-medium text-gray-700 mb-1">End Date</label>
                     <input
                       type="date"
                       {...register('endDate')}
-                      className="border p-2 rounded w-full"
+                      className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block font-medium">Required Skills (comma separated)</label>
+                  <label className="block font-medium text-gray-700 mb-1">
+                    Required Skills <span className="text-sm text-gray-500">(comma separated)</span>
+                  </label>
                   <input
                     {...register('requiredSkills')}
-                    className="border p-2 rounded w-full"
+                    className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="React, Node.js, TypeScript"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-medium">Team Size</label>
+                  <label className="block font-medium text-gray-700 mb-1">Team Size</label>
                   <input
                     type="number"
+                    min="1"
                     {...register('teamSize', {
                       required: 'Team size is required',
                       min: { value: 1, message: 'Minimum team size is 1' },
+                      valueAsNumber: true,
                     })}
-                    className="border p-2 rounded w-full"
+                    className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Enter team size"
                   />
-                  {errors.teamSize && <p className="text-red-500 text-sm">{errors.teamSize.message}</p>}
+                  {errors.teamSize && <p className="text-red-500 text-sm mt-1">{errors.teamSize.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-medium">Status</label>
-                  <select {...register('status')} className="border p-2 rounded w-full">
+                  <label className="block font-medium text-gray-700 mb-1">Status</label>
+                  <select 
+                    {...register('status')} 
+                    className="border border-gray-300 p-2 rounded w-full focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
                     <option value="planning">Planning</option>
                     <option value="active">Active</option>
                     <option value="completed">Completed</option>
                   </select>
                 </div>
 
-                <button
-                  type="submit"
-                  className="bg-indigo-400 text-white px-4 py-2 rounded hover:bg-indigo-500 transition"
-                >
-                  {editMode ? 'Update Project' : 'Submit'}
-                </button>
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-indigo-400 text-white px-4 py-2 rounded hover:bg-indigo-500 transition font-medium"
+                  >
+                    {editMode ? 'Update Project' : 'Create Project'}
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForm(false);
+                      setEditMode(false);
+                      setProjectToEdit(null);
+                      reset();
+                    }}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
             </div>
           </div>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 import { baseUrl } from '../../url';
+import EngineerHeader from '../../components/EngineerHeader';
+
 interface Assignment {
   _id: string;
   engineerId: string;
@@ -15,27 +16,57 @@ interface Assignment {
 const EngineerAssignments: React.FC = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
- const navigate=useNavigate()
-    const storedUserData = localStorage.getItem('userdata');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  const storedUserData = localStorage.getItem('userdata');
   const userData = storedUserData ? JSON.parse(storedUserData) : null;
+
   useEffect(() => {
     // Check if userData exists and has a token
     if (!userData || !userData.token) {
       navigate('/login');
     }
   }, [navigate, userData]);
+
   useEffect(() => {
     const fetchAssignments = async () => {
       const local = localStorage.getItem('userdata');
       const userId = local ? JSON.parse(local)?.userId : null;
-      if (!userId) return;
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const res = await fetch(`${baseUrl}/engineer/${userId}`);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
         const data = await res.json();
-        setAssignments(data);
+        
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid response format');
+        }
+        
+        // Handle different possible response structures
+        if (Array.isArray(data)) {
+          setAssignments(data);
+        } else if (data && Array.isArray(data.assignments)) {
+          setAssignments(data.assignments);
+        } else if (data && Array.isArray(data.data)) {
+          setAssignments(data.data);
+        } else {
+          console.error('Unexpected data structure:', data);
+          setAssignments([]); // Fallback to empty array
+          setError('Unexpected data format received from server');
+        }
       } catch (error) {
         console.error('Failed to fetch assignments:', error);
+        setError('Failed to fetch assignments');
+        setAssignments([]); // Ensure assignments is always an array
       } finally {
         setLoading(false);
       }
@@ -55,6 +86,12 @@ const EngineerAssignments: React.FC = () => {
   };
 
   const renderAssignments = (status: 'planning' | 'active' | 'completed') => {
+    // Ensure assignments is an array before filtering
+    if (!Array.isArray(assignments)) {
+      console.error('assignments is not an array:', assignments);
+      return <p className="text-sm text-red-500 italic">Error: Invalid data format</p>;
+    }
+
     const filtered = assignments.filter(a => determineStatus(a.startDate, a.endDate) === status);
 
     if (filtered.length === 0) {
@@ -85,6 +122,22 @@ const EngineerAssignments: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-indigo-500 text-lg font-medium">Loading assignments...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg font-medium mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

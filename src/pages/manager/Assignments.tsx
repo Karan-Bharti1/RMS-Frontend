@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+mport React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { FiX, FiEdit2 } from 'react-icons/fi';
-
-
 import { useNavigate } from 'react-router-dom';
 import { useAssignments } from '../../contexts/assignmentContext';
 import { useEngineers } from '../../contexts/userContext';
 import { useProjects } from '../../contexts/projectContext';
 import ManagerHeader from '../../components/ManagerHeader';
+
 interface AssignmentFormInputs {
   engineerId: string;
   projectId: string;
@@ -17,9 +16,16 @@ interface AssignmentFormInputs {
   role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
 }
 
+// Updated to match your context interface
 interface AssignmentType {
   _id: string;
-  engineerId: string;
+  engineerId: {
+    _id: string;
+    username?: string;
+    name?: string;
+    firstName?: string;
+    email?: string;
+  };
   projectId: string;
   allocationPercentage: number;
   startDate: string;
@@ -27,33 +33,63 @@ interface AssignmentType {
   role: 'Developer' | 'Tech Lead' | 'QA' | 'Manager';
 }
 
-const roles = ['Developer', 'Tech Lead', 'QA', 'Manager'];
+// Define Engineer interface
+interface Engineer {
+  _id: string;
+  id?: string;
+  username?: string;
+  name?: string;
+  firstName?: string;
+  email?: string;
+}
+
+// Define Project interface
+interface Project {
+  _id: string;
+  id?: string;
+  name?: string;
+  title?: string;
+}
+
+// Define UserData interface
+interface UserData {
+  token: string;
+  userId: string;
+}
+
+const roles: Array<'Developer' | 'Tech Lead' | 'QA' | 'Manager'> = [
+  'Developer', 
+  'Tech Lead', 
+  'QA', 
+  'Manager'
+];
 
 const Assignment: React.FC = () => {
   const assignmentContext = useAssignments();
   const projectContext = useProjects();
   const engineerContext = useEngineers();
+  const navigate = useNavigate();
 
-  // Safely extract data with fallbacks
-  const assignments = assignmentContext?.assignments || [];
-  const createAssignment = assignmentContext?.createAssignment || (() => {});
-  const updateAssignment = assignmentContext?.updateAssignment || (() => {});
-  const projects = projectContext?.projects || [];
-  const engineers = engineerContext?.engineers || [];
+  // Safely extract data with proper typing
+  const assignments: AssignmentType[] = assignmentContext?.assignments || [];
+  const createAssignment = assignmentContext?.createAssignment || (async () => {});
+  const updateAssignment = assignmentContext?.updateAssignment || (async () => {});
+  const projects: Project[] = projectContext?.projects || [];
+  const engineers: Engineer[] = engineerContext?.engineers || [];
 
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState<boolean>(false);
   const [editingAssignment, setEditingAssignment] = useState<AssignmentType | null>(null);
- const navigate=useNavigate()
-    const storedUserData = localStorage.getItem('userdata');
-  const userData = storedUserData ? JSON.parse(storedUserData) : null;
+
+  // Properly type userData
+  const storedUserData = localStorage.getItem('userdata');
+  const userData: UserData | null = storedUserData ? JSON.parse(storedUserData) : null;
+
   useEffect(() => {
     // Check if userData exists and has a token
     if (!userData || !userData.token) {
       navigate('/login');
     }
   }, [navigate, userData]);
-  
-
 
   const {
     register,
@@ -63,7 +99,7 @@ const Assignment: React.FC = () => {
     formState: { errors },
   } = useForm<AssignmentFormInputs>();
 
-  const onSubmit = async (data: AssignmentFormInputs) => {
+  const onSubmit = async (data: AssignmentFormInputs): Promise<void> => {
     try {
       console.log('Submitting assignment data:', data);
       if (editingAssignment) {
@@ -79,24 +115,24 @@ const Assignment: React.FC = () => {
     }
   };
 
-  const closeForm = () => {
+  const closeForm = (): void => {
     setShowForm(false);
     setEditingAssignment(null);
     reset();
   };
 
-  const openCreateForm = () => {
+  const openCreateForm = (): void => {
     setEditingAssignment(null);
     setShowForm(true);
     reset();
   };
 
-  const openEditForm = (assignment: AssignmentType) => {
+  const openEditForm = (assignment: AssignmentType): void => {
     setEditingAssignment(assignment);
     setShowForm(true);
     
     // Pre-fill form with existing data
-    setValue('engineerId', assignment.engineerId);
+    setValue('engineerId', assignment.engineerId._id);
     setValue('projectId', assignment.projectId);
     setValue('allocationPercentage', assignment.allocationPercentage);
     setValue('startDate', assignment.startDate.split('T')[0]); // Format date for input
@@ -105,11 +141,18 @@ const Assignment: React.FC = () => {
   };
 
   // Enhanced helper function to safely get engineer name
-  const getEngineerName = (engineerId: string) => {
-    console.log(`Getting engineer name for ID: ${engineerId}`);
+  const getEngineerName = (engineerId: string | { _id: string; username?: string; name?: string; firstName?: string; email?: string }): string => {
+    console.log(`Getting engineer name for ID:`, engineerId);
     
-    if (!engineerId) {
-      console.log('No engineer ID provided');
+    // Handle case where engineerId is an object (populated)
+    if (typeof engineerId === 'object' && engineerId !== null) {
+      const displayName = engineerId.username || engineerId.name || engineerId.firstName || engineerId.email || 'Unknown Engineer';
+      return String(displayName);
+    }
+    
+    // Handle case where engineerId is a string
+    if (!engineerId || typeof engineerId !== 'string') {
+      console.log('No engineer ID provided or invalid type');
       return 'No Engineer Assigned';
     }
     
@@ -118,47 +161,24 @@ const Assignment: React.FC = () => {
       return `Engineer ID: ${engineerId}`;
     }
     
-    // Try multiple ways to find the engineer
-    let engineer = engineers.find(e => e && e._id === engineerId);
+    // Try to find the engineer
+    const engineer = engineers.find(e => e && e._id === engineerId);
     
     if (!engineer) {
-      // Try with id field instead of _id
-      engineer = engineers.find(e => e && e.id === engineerId);
-    }
-    
-    if (!engineer) {
-      // Try string comparison (in case of type mismatch)
-      engineer = engineers.find(e => e && String(e._id) === String(engineerId));
-    }
-    
-    if (!engineer) {
-      // Try with userId field (if that's what's being used)
-      engineer = engineers.find(e => e && e.userId === engineerId);
-    }
-    
-    if (!engineer) {
-      console.log(`Engineer not found for ID: ${engineerId}`);
-      console.log('Available engineers:', engineers.map(e => ({ 
-        _id: e?._id, 
-        id: e?.id, 
-        userId: e?.userId,
-        name: e?.name, 
-        username: e?.username 
-      })));
       return `Engineer ID: ${engineerId}`;
     }
     
     console.log('Found engineer:', engineer);
     
     // Get the display name
-    const displayName = engineer.name || engineer.username || engineer.firstName || engineer.email || 'Unknown Engineer';
+    const displayName = engineer.username || engineer.name || engineer.firstName || engineer.email || 'Unknown Engineer';
     console.log(`Engineer display name: ${displayName}`);
     
     return String(displayName);
   };
 
   // Enhanced helper function to safely get project name
-  const getProjectName = (projectId: string) => {
+  const getProjectName = (projectId: string): string => {
     console.log(`Getting project name for ID: ${projectId}`);
     
     if (!projectId) {
@@ -171,27 +191,10 @@ const Assignment: React.FC = () => {
       return `Project ID: ${projectId}`;
     }
     
-    // Try multiple ways to find the project
-    let project = projects.find(p => p && p._id === projectId);
+    // Try to find the project
+    const project = projects.find(p => p && p._id === projectId);
     
     if (!project) {
-    
-      project = projects.find(p => p && p.id === projectId);
-    }
-    
-    if (!project) {
-      // Try string comparison (in case of type mismatch)
-      project = projects.find(p => p && String(p._id) === String(projectId));
-    }
-    
-    if (!project) {
-      console.log(`Project not found for ID: ${projectId}`);
-      console.log('Available projects:', projects.map(p => ({ 
-        _id: p?._id, 
-        id: p?.id, 
-        name: p?.name, 
-        title: p?.title 
-      })));
       return `Project ID: ${projectId}`;
     }
     
@@ -205,7 +208,7 @@ const Assignment: React.FC = () => {
   };
 
   // Helper function to safely format date
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     try {
       if (!dateString) return 'N/A';
       return new Date(dateString).toLocaleDateString();
@@ -229,7 +232,6 @@ const Assignment: React.FC = () => {
           </button>
         </div>
 
-       
         {/* Assignment Cards */}
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {Array.isArray(assignments) && assignments.length > 0 ? (
@@ -239,7 +241,7 @@ const Assignment: React.FC = () => {
                 return null;
               }
 
-              const engineerName = getEngineerName(assignment.engineerId._id);
+              const engineerName = getEngineerName(assignment.engineerId);
               const projectName = getProjectName(assignment.projectId);
 
               return (
@@ -260,7 +262,7 @@ const Assignment: React.FC = () => {
                   <div className="space-y-1 text-sm">
                     <p>
                       <span className="font-medium text-gray-700">Engineer:</span>{' '}
-                      <span className="text-gray-900" title={`Engineer ID: ${assignment.engineerId}`}>
+                      <span className="text-gray-900" title={`Engineer ID: ${typeof assignment.engineerId === 'object' ? assignment.engineerId._id : assignment.engineerId}`}>
                         {engineerName}
                       </span>
                     </p>

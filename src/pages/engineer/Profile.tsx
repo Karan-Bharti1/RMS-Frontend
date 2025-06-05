@@ -42,7 +42,7 @@ const Profile: React.FC = () => {
     if (!userdata || !userdata.token) {
       navigate('/login');
     }
-  }, [navigate, userData]);
+  }, [navigate, userdata]);
   useEffect(() => {
     const fetchUserAndCapacity = async () => {
       const local = localStorage.getItem('userdata');
@@ -92,7 +92,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  const render = (val: any) => val ?? '—';
+  const render = (val: string | number | undefined | null) => val ?? '—';
   const capacityUsed = userData?.maxCapacity && availableCapacity != null
     ? userData.maxCapacity - availableCapacity
     : 0;

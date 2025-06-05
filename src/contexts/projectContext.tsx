@@ -5,7 +5,7 @@ import { baseUrl } from '../url';
 
 
 interface Project {
-  id: string;
+  _id: string;
   name: string;
   description: string;
   startDate: string;
