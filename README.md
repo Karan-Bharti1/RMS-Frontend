@@ -206,16 +206,7 @@ PORT=5000
 
 3. Run backend:
 ```bash
-npm start
-```
-
-### Frontend
-
-1. Navigate to frontend directory:
-```bash
-cd client
-npm install
-```
+npm i
 
 
 
