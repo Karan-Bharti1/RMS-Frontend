@@ -1,9 +1,9 @@
-# RMS-Frontend
+⁹# RMS-Frontend
 
 
 # 🚀 RMS - Resource Management System
 
-**RMS** is a full-stack web application designed to streamline team and project management for tech organizations. It enables **Managers** to efficiently assign engineers to projects based on capacity, skills, and availability, while **Engineers** can view and manage their assignments.
+**RMS** is a full-stack web application designed to streamline team and project management for tech organizations. It enables **Managers** to efficiently assign engineers to projects based on capacity, skills
 
 ---
 
@@ -30,7 +30,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
 
 l
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
 
 
 
