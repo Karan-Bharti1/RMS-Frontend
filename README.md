@@ -198,11 +198,7 @@ npm install
 ```
 
 2. Create a `.env`:
-```env
-MONGODB=your_mongo_uri
-JWT_SECRET=your_secret_key
-PORT=5000
-```
+
 
 3. Run backend:
 ```bash
