@@ -75,12 +75,7 @@ l
 ### 1. 🧠 Available Capacity
 
 ```ts
-function getAvailableCapacity(engineerId) {
-  const engineer = getEngineer(engineerId);
-  const activeAssignments = getActiveAssignments(engineerId);
-  const totalAllocated = activeAssignments.reduce((sum, a) => sum + a.allocationPercentage, 0);
-  return engineer.maxCapacity - totalAllocated;
-}
+
 ```
 
 - Full-time engineers: 100% capacity
