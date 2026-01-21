@@ -1,11 +1,7 @@
 ⁹# RMS-Frontend
 
 
-# 🚀 RMS - Resource Management System
-
-**RMS** is a full-stack web application designed to streamline team and project management for tech organizations. It enables **Managers** to efficiently assign engineers to projects based on capacity, skills
-
----
+# 🚀 RMS 
 
 ## 🛠 Tech Stack
 
