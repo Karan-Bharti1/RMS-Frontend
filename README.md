@@ -1,4 +1,4 @@
-⁹# RMS-Frontend
+# RMS-Frontend
 
 
 # 🚀 RMS 
@@ -176,24 +176,6 @@ src/
 └── main.tsx                    # Entry point
 
 ```
-
----
-
-## ⚙️ Setup Instructions
-
-### Backend
-
-1. Clone and install dependencies:
-```bash
-npm install
-```
-
-2. Create a `.env`:
-
-
-3. Run backend:
-```bash
-npm i
 
 
 
