@@ -117,13 +117,7 @@ This project proudly utilized **AI tools** for rapid and intelligent development
   - Tailwind styling
   - README.md generation and documentation
 
-AI was used as a **productivity booster**, not a replacement for understanding. All implementation was done with clear technical knowledge and intent.
 
-```
-![AI Assisted](https://img.shields.io/badge/AI%20Assisted-Yes-blue)
-```
-
----
 
 ## 📂 Project Structure (Frontend)
 
