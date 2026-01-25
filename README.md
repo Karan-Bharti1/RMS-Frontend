@@ -67,9 +67,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
 
 - Name, skills (React, Node.js, etc.), seniority level
 - Employment type: Full-time / Part-time
-- Current status: Available % and allocation
 
----
 
 ### 3. 🗂️ Project Management
 
