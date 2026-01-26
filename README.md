@@ -23,12 +23,7 @@
 ## 🚀 About Me
 Hi there! 👋.
 I am currently learning Full Stack Web Development with a focus on the MERN stack (MongoDB, Express.js, React, and 
-## 🔐 Roles & Login System
-
-- **Manager**: Can assign engineers, manage projects, track team capacity
-- **Engineer**: Can view current/upcoming assignments and manage profile
-
----
+## 🔐 Roles & Login 
 
 ## ✨ Key Features
 
