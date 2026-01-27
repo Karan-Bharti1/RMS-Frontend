@@ -94,9 +94,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
 ### 6. 🔍 Search & Analytics
 
 - Filter engineers by skills
-- Filter projects by status
-- Analytics: team utilization via simple charts
-
+- Filter projects by 
 ---
 
 ## 🧠 AI-Assisted Development
