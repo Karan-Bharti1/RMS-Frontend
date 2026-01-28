@@ -99,15 +99,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
 
 ## 🧠 AI-Assisted Development
 
-This project proudly utilized **AI tools** for rapid and intelligent development. Specifically:
-
-- **ChatGPT by OpenAI** helped with:
-  - Writing API logic
-  - React component structure
-  - Form validation logic
-  - Tailwind styling
-  - README.md generation and documentation
-
+This project proudly utilized **AI tools** for rapid and intelligent development. 
 
 
 ## 📂 Project Structure (Frontend)
