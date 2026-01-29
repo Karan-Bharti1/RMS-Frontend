@@ -1,4 +1,4 @@
-# RMS-Frontend
+⁸# RMS-Frontend
 
 
 # 🚀 RMS 
@@ -9,8 +9,7 @@
 
 - ⚛️ **React** with **TypeScript** for type-safe components
 - 🌿 **Context API** for global state management
-- 🎨 **Tailwind CSS** for modern utility-based styling
-- 📋 **React Hook Form** for form handling and validation
+- 🎨 **Tailwind CSS** for modern utility-based 
 - 📦 **Vite** or CRA (depending on setup)
 ## Author
 
