@@ -32,8 +32,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
   - View engineers with current load (e.g., _“John: 80% allocated”_)
 - **Create Assignment**:
   - Assign engineers to projects with allocation percentage
-- **Project Management**:
-  - Create/edit projects, define required skills & status
+
 
 ### 👨‍💻 Engineer Pages
 
