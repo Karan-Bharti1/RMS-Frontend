@@ -74,8 +74,7 @@ I am currently learning Full Stack Web Development with a focus on the MERN stac
 
 - Assign engineers with allocation %
 - View current engineer-project assignments
-- Capacity tracker for each engineer
-
+  
 ---
 
 ### 5. 📊 Dashboard Views
