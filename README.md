@@ -1,4 +1,4 @@
-⁸# RMS-Frontend
+8⁸# RMS-Frontend
 
 
 # 🚀 RMS 
@@ -118,8 +118,6 @@ src/
 │   └── userContext.tsx
 ├── pages/                      # Route-level views
 │   ├── auth/                   # Login/Register
-│   │   ├── Login.tsx
-│   │   └── Register.tsx
 │   ├── engineer/               # Engineer-specific pages
 │   │   ├── EngineerAssignments.tsx
 │   │   └── Profile.tsx
