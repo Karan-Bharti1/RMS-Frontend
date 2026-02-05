@@ -137,4 +137,4 @@ src/
 
 ## 🚀 About Me
 Hi there! 👋.
-I am currently learning Full Stack Web Development with a focus on the MERN stack (MongoDB, Express.js, React, and Node.js).
+I am currently learning Full Stack Web Development with a focus on the MERN stack 
